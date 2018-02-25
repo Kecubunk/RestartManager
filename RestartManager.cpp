@@ -6,14 +6,21 @@
 
 
 
-RestartManager::RestartManager(uint32_t scheduledRestartTime, uint32_t maxiumTimeForScheduledRestart){
+RestartManager::RestartManager(){
+
+
+
+}
+
+
+void RestartManager::setSchedule(uint32_t scheduledRestartTime, uint32_t maxiumTimeForScheduledRestart){
 
   this->scheduledRestartTime = scheduledRestartTime;
   this->maxiumTimeForScheduledRestart = maxiumTimeForScheduledRestart;
 
 }
 
-RestartManager::RestartManager(uint32_t scheduledRestartTime){
+void RestartManager::setSchedule(uint32_t scheduledRestartTime){
 
   this->scheduledRestartTime = scheduledRestartTime;
   maxiumTimeForScheduledRestart = 4294937295;   //this is 30 seconds before overflow
@@ -30,15 +37,15 @@ void RestartManager::setGpioRestart(uint8_t restartPin){
 
 }
 
-void RestartManager::setBeforeRestartCallback(void_callback *beforeRestartCallback){
+void RestartManager::setBeforeRestartCallback(void_callback beforeRestartCallback){
 
-  this->beforeRestartCallback = *beforeRestartCallback;
+  this->beforeRestartCallback = beforeRestartCallback;
 
 }
 
-void RestartManager::setScheduledRestartTimeFailCallback(void_callback *scheduledRestartTimeFailCallback){
+void RestartManager::setScheduledRestartTimeFailCallback(void_callback scheduledRestartTimeFailCallback){
 
-  this->scheduledRestartTimeFailCallback = *scheduledRestartTimeFailCallback;
+  this->scheduledRestartTimeFailCallback = scheduledRestartTimeFailCallback;
 
 }
 
@@ -49,7 +56,7 @@ void RestartManager::restartNow(){
     return;
   }
 
-  beforeRestartCallback();
+  (*beforeRestartCallback)();
 
   if(restartTroughGpio){
     digitalWrite(restartPin, false);
@@ -95,7 +102,7 @@ void RestartManager::run(){
 
   if(maxiumTimeForScheduledRestart <= now){
     if(!scheduledRestartTimeFailCallbackCalled){
-      scheduledRestartTimeFailCallback();
+      (*scheduledRestartTimeFailCallback)();
     }
   }
 

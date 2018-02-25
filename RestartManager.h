@@ -8,20 +8,21 @@
 #include <Arduino.h>
 
 
-typedef std::function<void(void)> void_callback;
+//typedef std::function<void(void)> void_callback;
+typedef void (*void_callback)(void);
 
 class RestartManager
 {
 
 public:
 
+    RestartManager();
 
-    RestartManager(uint32_t scheduledRestartTime, uint32_t maxiumTimeForScheduledRestart);
-    RestartManager(uint32_t scheduledRestartTime);
-
+    void setSchedule(uint32_t scheduledRestartTime, uint32_t maxiumTimeForScheduledRestart);
+    void setSchedule(uint32_t scheduledRestartTime);
     void setGpioRestart(uint8_t restartPin);
-    void setBeforeRestartCallback(void_callback *beforeRestartCallback);
-    void setScheduledRestartTimeFailCallback(void_callback *scheduledRestartTimeFailCallback);
+    void setBeforeRestartCallback(void_callback beforeRestartCallback);
+    void setScheduledRestartTimeFailCallback(void_callback scheduledRestartTimeFailCallback);
 
     void restartNow();
     void forbidRestart();
