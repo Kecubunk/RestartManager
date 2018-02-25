@@ -6,90 +6,100 @@
 
 
 
+RestartManager::RestartManager(uint32_t scheduledRestartTime, uint32_t maxiumTimeForScheduledRestart){
+
+  this->scheduledRestartTime = scheduledRestartTime;
+  this->maxiumTimeForScheduledRestart = maxiumTimeForScheduledRestart;
+
+}
+
 RestartManager::RestartManager(uint32_t scheduledRestartTime){
 
   this->scheduledRestartTime = scheduledRestartTime;
-  scheduledRestartMetro.timeout(scheduledRestartTime);
-  restartTroughGpio = false;
+  maxiumTimeForScheduledRestart = 4294937295;   //this is 30 seconds before overflow
 
 }
 
-bool getNTPtime(){
 
+void RestartManager::setGpioRestart(uint8_t restartPin){
 
-}
-
-void setGpioRestart(uint8_t restartPin){
-
-
-}
-void setBeforeRestartCallback(*void_callback beforeRestartCallback){
-
-
-}
-void setScheduledRestartTimeFailCallback(*void_callback scheduledRestartTimeFailCallback){
-
+  this->restartPin = restartPin;
+  restartTroughGpio = true;
+  pinMode(restartPin, OUTPUT);
+  digitalWrite(restartPin, true);
 
 }
 
-void restartNow(){
+void RestartManager::setBeforeRestartCallback(void_callback *beforeRestartCallback){
 
-beforeRestartCallback();
+  this->beforeRestartCallback = *beforeRestartCallback;
 
 }
 
-void forbidRestart(){
+void RestartManager::setScheduledRestartTimeFailCallback(void_callback *scheduledRestartTimeFailCallback){
+
+  this->scheduledRestartTimeFailCallback = *scheduledRestartTimeFailCallback;
+
+}
+
+
+void RestartManager::restartNow(){
+
+  if(!restartAllowed){
+    return;
+  }
+
+  beforeRestartCallback();
+
+  if(restartTroughGpio){
+    digitalWrite(restartPin, false);
+  }
+  else{
+    ESP.reset();
+  }
+
+}
+
+void RestartManager::forbidRestart(){
 
   restartAllowed = false;
 
 }
 
-void allowRestart(){
+void RestartManager::allowRestart(){
 
   restartAllowed = true;
 
 }
 
+void RestartManager::allowRestart(uint32_t addDelay){
 
-void run(){
+  uint32_t now = millis();
 
+  restartAllowed = true;
 
+  if(scheduledRestartTime >= now + addDelay){
+    return;
+  }
+  else{
+    scheduledRestartTime = (addDelay + now);
+  }
 
 }
 
 
 
+void RestartManager::run(){
 
+  uint32_t now = millis();
 
+  if(maxiumTimeForScheduledRestart <= now){
+    if(!scheduledRestartTimeFailCallbackCalled){
+      scheduledRestartTimeFailCallback();
+    }
+  }
 
-
-
-void rstTimeCalculator(){
-	dateTime = NTPch.getNTPtime(1.0, 1);
-	if(dateTime.valid){
-		timer.setTimeout(((24-dateTime.hour+rstAtHour)+rstDay*24*60*60*1000), rstESP);
-	}
-	else{
-		timer.setTimeout(36000, rstTimeCalculator);
-	}
-	Serial.println("TIME FOR RESTART ON SCHEDULE CALCULATED");
-}
-
-void rstESP(){
-	if(rstIsAllowed){
-		Serial.println("ESP RESTARTING");
-		ESP.reset();
-	}
-	else{
-		rstAsSoonAsPossible = true;
-	}
-}
-
-void checkRstCritical(){
-	if(rstAsSoonAsPossible){
-		if(rstIsAllowed){
-			timer.setTimeout(RST_CRITICAL_DELAY_TIME, rstESP);
-			rstAsSoonAsPossible = false;
-		}
-	}
+  if(restartAllowed && scheduledRestartTime <= now){
+    restartNow();
+  }
 }
