@@ -7,8 +7,6 @@
 
 #include <Arduino.h>
 
-
-//typedef std::function<void(void)> void_callback;
 typedef void (*void_callback)(void);
 
 class RestartManager
@@ -43,7 +41,7 @@ private:
   bool restartAllowed = true;
   uint8_t restartPin;
   uint32_t scheduledRestartTime;
-  uint32_t maxiumTimeForScheduledRestart;
+  uint32_t maxiumTimeForScheduledRestart = 4294930000;
 
 };
 

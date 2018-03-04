@@ -23,7 +23,6 @@ void RestartManager::setSchedule(uint32_t scheduledRestartTime, uint32_t maxiumT
 void RestartManager::setSchedule(uint32_t scheduledRestartTime){
 
   this->scheduledRestartTime = scheduledRestartTime;
-  maxiumTimeForScheduledRestart = 4294937295;   //this is 30 seconds before overflow
 
 }
 
@@ -51,6 +50,8 @@ void RestartManager::setScheduledRestartTimeFailCallback(void_callback scheduled
 
 
 void RestartManager::restartNow(){
+
+  Serial.println("1");
 
   if(!restartAllowed){
     return;
