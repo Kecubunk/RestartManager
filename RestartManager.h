@@ -40,7 +40,7 @@ private:
   bool restartTroughGpio = false;
   bool restartAllowed = true;
   uint8_t restartPin;
-  uint32_t scheduledRestartTime;
+  uint32_t scheduledRestartTime = 4294930000;
   uint32_t maxiumTimeForScheduledRestart = 4294930000;
 
 };
