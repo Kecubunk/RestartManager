@@ -99,13 +99,13 @@ void RestartManager::run(){
 
   uint32_t now = millis();
 
-  if(maxiumTimeForScheduledRestart <= now{
+  if(maxiumTimeForScheduledRestart <= now){
     if(!scheduledRestartTimeFailCallbackCalled){
       (*scheduledRestartTimeFailCallback)();
     }
   }
 
-  if(restartAllowed && scheduledRestartTime <= now{
+  if(restartAllowed && scheduledRestartTime <= now){
     restartNow();
   }
 }
